@@ -1,0 +1,25 @@
+Function Inventory ($Instances)
+ {
+$Instances = Get-AWSRegion | % {"Region $_.Region"; (get-Ec2Instance -region $_.region).Instances}
+$VPCS = Get-AWSRegion | % {"Region $_.Region"; (get-Ec2Instance -region $_.region).Instances}
+ foreach ($VPC in $VPCS) {
+$Instances | Where-Object {$_.VpcId -eq $VPC.VpcId} | foreach {
+New-Object -TypeName PSObject -Property @{
+'VpcId' = $_.VpcId
+'VPCName' = ($VPC.Tags | Where-Object {$_.Key -eq 'Name'}).Value
+'InstanceId' = $_.InstanceId
+'InstanceName' = ($_.Tags | Where-Object {$_.Key -eq 'Name'}).Value
+'LaunchTime' = $_.LaunchTime
+'State' = $_.State.Name
+'KeyName' = $_.KeyName
+'InstanceType' = $_.InstanceType
+'Private IP Address' = $_.PrivateIpAddress
+'Platform' = $_.Platform
+'Placement' = $_.Placement.AvailabilityZone
+
+}
+}
+}
+}
+
+ Inventory | select instancename 
